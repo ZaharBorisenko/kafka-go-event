@@ -1,0 +1,39 @@
+# --- Compiled Binaries ---
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Specific binary output (if you use 'go build -o app')
+app
+main
+
+# --- Test Artifacts ---
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# --- Dependency Directories ---
+# Most Go projects do NOT ignore vendor/ unless using specific workflows.
+# Uncomment the line below if you don't want to track dependencies.
+# vendor/
+
+# --- IDE & System Files ---
+# JetBrains (GoLand)
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Environment variables (secrets)
+.env
+.env.local
+
+# OS Specific
+.DS_Store
+Thumbs.db
