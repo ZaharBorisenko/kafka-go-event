@@ -42,7 +42,7 @@ func (s accountEventHandler) Handle(topic string, eventBytes []byte) {
 			return
 		}
 
-		log.Println(event)
+		log.Printf("[%v] %#v", topic, event)
 
 	case reflect.TypeOf(events.DepositFundEvent{}).Name():
 		event := events.DepositFundEvent{}
@@ -65,7 +65,7 @@ func (s accountEventHandler) Handle(topic string, eventBytes []byte) {
 			return
 		}
 
-		log.Println(event)
+		log.Printf("[%v] %#v", topic, event)
 
 	case reflect.TypeOf(events.WithdrawFundEvent{}).Name():
 		event := events.WithdrawFundEvent{}
@@ -88,7 +88,7 @@ func (s accountEventHandler) Handle(topic string, eventBytes []byte) {
 			return
 		}
 
-		log.Println(event)
+		log.Printf("[%v] %#v", topic, event)
 
 	case reflect.TypeOf(events.CloseAccountEvent{}).Name():
 		event := events.CloseAccountEvent{}
@@ -104,7 +104,8 @@ func (s accountEventHandler) Handle(topic string, eventBytes []byte) {
 			return
 		}
 
-		log.Println(event)
+		log.Printf("[%v] %#v", topic, event)
+
 	default:
 		log.Println("no event handler")
 	}
