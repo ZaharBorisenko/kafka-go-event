@@ -67,32 +67,4 @@ func main() {
 	for {
 		consumer.Consume(context.Background(), events.Topics, accountConsumeHandler)
 	}
-
 }
-
-//func main() {
-//	addr := []string{"localhost:29092"}
-//
-//	consumer, err := sarama.NewConsumer(addr, nil)
-//	if err != nil {
-//		panic(err)
-//	}
-//	defer consumer.Close()
-//
-//	partitionConsumer, err := consumer.ConsumePartition("test-topic", 0, sarama.OffsetNewest)
-//	if err != nil {
-//		panic(err)
-//	}
-//	defer partitionConsumer.Close()
-//
-//	fmt.Println("consumer start.")
-//	for {
-//		select {
-//		case err := <-partitionConsumer.Errors():
-//			fmt.Println(err)
-//		case msg := <-partitionConsumer.Messages():
-//			fmt.Println(msg.Topic, ":", string(msg.Value))
-//
-//		}
-//	}
-//}

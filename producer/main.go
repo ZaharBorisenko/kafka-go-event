@@ -1,32 +1,42 @@
 package main
 
 import (
-	"fmt"
 	"github.com/IBM/sarama"
-	"time"
+	"github.com/gofiber/fiber/v2"
+	"github.com/spf13/viper"
+	"producer/controllers"
+	"producer/services"
+	"strings"
 )
 
-func main() {
-	addr := []string{"localhost:29092"}
+func init() {
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	if err := viper.ReadInConfig(); err != nil {
+		panic(err)
+	}
+}
 
-	producer, err := sarama.NewSyncProducer(addr, nil)
+func main() {
+	producer, err := sarama.NewSyncProducer(viper.GetStringSlice("kafka.servers"), nil)
 	if err != nil {
 		panic(err)
 	}
 	defer producer.Close()
 
-	fmt.Println("producer start sending message...")
-	msg := sarama.ProducerMessage{
-		Topic:     "test-topic",
-		Value:     sarama.StringEncoder("Hello consumer with key"),
-		Key:       sarama.StringEncoder("user-1"),
-		Timestamp: time.Time{},
-	}
+	eventProducer := services.NewEventProducer(producer)
+	accountService := services.NewAccountService(eventProducer)
+	accountController := controllers.NewAccountController(accountService)
 
-	p, o, err := producer.SendMessage(&msg)
-	if err != nil {
-		panic(err)
-	}
+	app := fiber.New()
+	app.Post("/openAccount", accountController.OpenAccount)
+	app.Post("/depositFund", accountController.DepositFund)
+	app.Post("/withDrawFund", accountController.WithDrawFund)
+	app.Post("/closeAccount", accountController.CloseAccount)
 
-	fmt.Printf("partition: %v, offset: %v", p, o)
+	app.Listen(":8000")
+
 }
