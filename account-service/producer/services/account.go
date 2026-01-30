@@ -43,7 +43,7 @@ func (a accountService) DepositFund(command command.DepositFundCommand) error {
 		return errors.New("bad request")
 	}
 	event := events.DepositFundEvent{
-		ID:     uuid.NewString(),
+		ID:     command.ID,
 		Amount: command.Amount,
 	}
 	log.Printf("%#v", event)
@@ -55,7 +55,7 @@ func (a accountService) WithDrawFund(command command.WithDrawFundCommand) error 
 		return errors.New("bad request")
 	}
 	event := events.WithdrawFundEvent{
-		ID:     uuid.NewString(),
+		ID:     command.ID,
 		Amount: command.Amount,
 	}
 	log.Printf("%#v", event)
@@ -66,7 +66,7 @@ func (a accountService) CloseAccount(command command.CloseAccountCommand) error 
 	if command.ID == "" {
 		return errors.New("bad request")
 	}
-	event := events.CloseAccountEvent{ID: uuid.NewString()}
+	event := events.CloseAccountEvent{ID: command.ID}
 	log.Printf("%#v", event)
 	return a.eventProducer.Produce(event)
 }
