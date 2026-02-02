@@ -13,7 +13,7 @@ func ClickHouseConnect() (driver.Conn, error) {
 	conn, err := clickhouse.Open(&clickhouse.Options{
 		Addr: []string{"localhost:9000"},
 		Auth: clickhouse.Auth{
-			Database: "default",
+			Database: "micro_kafka_db",
 			Username: "clickhouse",
 			Password: "admin",
 		},

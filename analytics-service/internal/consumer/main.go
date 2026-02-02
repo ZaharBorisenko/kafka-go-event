@@ -1,6 +1,8 @@
 package main
 
 import (
+	"analytics-service/internal/consumer/services"
+	"analytics-service/internal/repository"
 	"context"
 	"events"
 	"fmt"
@@ -9,47 +11,51 @@ import (
 	"strings"
 )
 
-type TestHandler struct{}
-
-func (h *TestHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
-func (h *TestHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
-func (h *TestHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	for msg := range claim.Messages() {
-		fmt.Printf("Message claimed: value = %s, timestamp = %v, topic = %s\n",
-			string(msg.Value), msg.Timestamp, msg.Topic)
-		sess.MarkMessage(msg, "")
-	}
-	return nil
-}
-
-func main() {
-	// Настройка viper (аналогично твоему коду)
+func init() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
-	viper.AddConfigPath("../../")
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	if err := viper.ReadInConfig(); err != nil {
 		panic(err)
 	}
+}
+
+func main() {
+	conn, err := repository.ClickHouseConnect()
+	if err != nil {
+		panic(err)
+	}
+
+	// 2. Инициализация цепочки (Repo -> EventHandler -> ConsumerHandler)
+	// Repo работает с БД
+	analyticsRepo := repository.NewAnalyticsRepository(conn)
+
+	// EventHandler содержит бизнес-логику (что делать с данными из Kafka)
+	analyticsEventHandler := services.NewAnalyticsEventHandler(analyticsRepo)
+
+	// Оборачиваем её в стандартный обработчик Sarama
+	handler := services.NewConsumerHandler(analyticsEventHandler)
 
 	consumer, err := sarama.NewConsumerGroup(
 		viper.GetStringSlice("kafka.servers"),
-		"test-service-group",
+		viper.GetString("kafka.group"),
 		nil,
 	)
 	if err != nil {
 		panic(err)
 	}
+	defer consumer.Close()
 
-	handler := &TestHandler{}
-	fmt.Println("Test service consumer started...")
+	fmt.Println("Analytics service consumer started...")
 
 	for {
+		// Используем наш собранный handler
 		err := consumer.Consume(context.Background(), events.Topics, handler)
 		if err != nil {
 			fmt.Printf("Error from consumer: %v\n", err)
 		}
 	}
+
 }
