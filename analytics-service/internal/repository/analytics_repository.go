@@ -19,18 +19,13 @@ func NewAnalyticsRepository(conn driver.Conn) AnalyticsRepository {
 }
 
 func (c *clickHouseRepo) LogEvent(ctx context.Context, eventType string, payload string) error {
-	// 1. Подготавливаем запрос
 	batch, err := c.conn.PrepareBatch(ctx, "INSERT INTOпше  events_log (type, data)")
 	if err != nil {
 		return fmt.Errorf("failed to prepare batch: %w", err)
 	}
-
-	// 2. Добавляем данные в батч
 	if err := batch.Append(eventType, payload); err != nil {
 		return fmt.Errorf("failed to append to batch: %w", err)
 	}
-
-	// 3. Отправляем в базу
 	if err := batch.Send(); err != nil {
 		return fmt.Errorf("failed to send batch: %w", err)
 	}

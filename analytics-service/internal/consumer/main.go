@@ -28,14 +28,8 @@ func main() {
 		panic(err)
 	}
 
-	// 2. Инициализация цепочки (Repo -> EventHandler -> ConsumerHandler)
-	// Repo работает с БД
 	analyticsRepo := repository.NewAnalyticsRepository(conn)
-
-	// EventHandler содержит бизнес-логику (что делать с данными из Kafka)
 	analyticsEventHandler := services.NewAnalyticsEventHandler(analyticsRepo)
-
-	// Оборачиваем её в стандартный обработчик Sarama
 	handler := services.NewConsumerHandler(analyticsEventHandler)
 
 	consumer, err := sarama.NewConsumerGroup(
