@@ -5,18 +5,17 @@ import (
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
-	"github.com/spf13/viper"
 )
 
 func ClickHouseConnect() (driver.Conn, error) {
 	ctx := context.Background()
 
 	conn, err := clickhouse.Open(&clickhouse.Options{
-		Addr: []string{viper.GetString("db.host")},
+		Addr: []string{"localhost:9000"},
 		Auth: clickhouse.Auth{
-			Database: viper.GetString("db.database"),
-			Username: viper.GetString("db.username"),
-			Password: viper.GetString("db.password"),
+			Database: "micro_kafka_db",
+			Username: "clickhouse",
+			Password: "admin",
 		},
 		ClientInfo: clickhouse.ClientInfo{
 			Products: []struct {
